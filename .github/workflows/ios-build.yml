@@ -45,10 +45,10 @@ jobs:
         echo "=== 检查目录结构 ==="
         find build/ios/ -name "*.app" -type d
         echo "=== 创建 IPA ==="
-        cd build/ios/archive/Runner.xcarchive/Products/Applications
-        zip -r ../../../../../ipa/Runner.ipa Runner.app
+        cd build/ios/Release-iphoneos
+        zip -r ../ipa/Runner.ipa Runner.app
         echo "=== IPA 文件创建完成 ==="
-        ls -la ../../../../../ipa/
+        ls -la ../ipa/
         
     - name: Debug - List all files
       run: |
