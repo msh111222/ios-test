@@ -1,4 +1,4 @@
-﻿name: iOS Build
+name: iOS Build
 
 on:
   push:
@@ -35,6 +35,8 @@ jobs:
         pod install
         cd ..
         flutter build ios --release --no-codesign
+      env:
+        IPHONEOS_DEPLOYMENT_TARGET: 13.0
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
