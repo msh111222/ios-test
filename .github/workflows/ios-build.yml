@@ -42,10 +42,13 @@ jobs:
       run: |
         echo "=== 创建 IPA 文件 ==="
         mkdir -p build/ios/ipa
+        echo "=== 检查目录结构 ==="
+        find build/ios/ -name "*.app" -type d
+        echo "=== 创建 IPA ==="
         cd build/ios/archive/Runner.xcarchive/Products/Applications
-        zip -r ../../../../ipa/Runner.ipa Runner.app
+        zip -r ../../../../../ipa/Runner.ipa Runner.app
         echo "=== IPA 文件创建完成 ==="
-        ls -la ../../../../ipa/
+        ls -la ../../../../../ipa/
         
     - name: Debug - List all files
       run: |
