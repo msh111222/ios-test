@@ -27,16 +27,25 @@ jobs:
     - name: Run Flutter tests
       run: flutter test
         
-    - name: Build iOS IPA
+    - name: Build iOS App
       run: |
         flutter clean
         flutter pub get
         cd ios
         pod install
         cd ..
-        flutter build ipa --release --no-codesign
+        flutter build ios --release --no-codesign
       env:
         IPHONEOS_DEPLOYMENT_TARGET: 13.0
+        
+    - name: Create IPA manually
+      run: |
+        echo "=== 创建 IPA 文件 ==="
+        mkdir -p build/ios/ipa
+        cd build/ios/archive/Runner.xcarchive/Products/Applications
+        zip -r ../../../../ipa/Runner.ipa Runner.app
+        echo "=== IPA 文件创建完成 ==="
+        ls -la ../../../../ipa/
         
     - name: Debug - List all files
       run: |
