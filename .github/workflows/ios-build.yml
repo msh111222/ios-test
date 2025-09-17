@@ -38,29 +38,20 @@ jobs:
       env:
         IPHONEOS_DEPLOYMENT_TARGET: 13.0
         
-    - name: Create IPA manually
+    - name: Create IPA file
       run: |
-        echo "=== 创建 IPA 文件 ==="
-        mkdir -p build/ios/ipa
-        echo "=== 检查目录结构 ==="
+        echo "=== 检查构建输出 ==="
         find build/ios/ -name "*.app" -type d
-        echo "=== 创建 IPA ==="
-        cd build/ios/Release-iphoneos
-        zip -r ../ipa/Runner.ipa Runner.app
-        echo "=== IPA 文件创建完成 ==="
-        ls -la ../ipa/
-        
-    - name: Debug - List all files
-      run: |
-        echo "=== 查看 build 目录结构 ==="
-        find build/ -type f -name "*.ipa" -o -name "*.app" | head -20
-        echo "=== 查看 build/ios 目录 ==="
-        ls -la build/ios/ || echo "build/ios 不存在"
-        echo "=== 查看 build/ios/ipa 目录 ==="
-        ls -la build/ios/ipa/ || echo "build/ios/ipa 不存在"
+        echo "=== 创建标准 IPA ==="
+        mkdir -p Payload
+        cp -r build/ios/Release-iphoneos/Runner.app Payload/
+        zip -r Runner.ipa Payload
+        rm -rf Payload
+        echo "=== IPA 创建完成 ==="
+        ls -la Runner.ipa
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ios-build
-        path: build/ios/
+        path: Runner.ipa
