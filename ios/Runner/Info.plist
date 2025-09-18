@@ -71,6 +71,14 @@
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_tcp._local.</string>
+		<string>_http._tcp.</string>
+		<string>_esp8266._tcp.</string>
 	</array>
+	<!-- 添加网络扩展权限 -->
+	<key>NSNetworkExtensionUsageDescription</key>
+	<string>此应用需要网络扩展权限以连接ESP8266设备</string>
+	<!-- 添加多播网络权限 -->
+	<key>NSMulticastNetworkingUsageDescription</key>
+	<string>此应用需要多播网络权限以发现ESP8266设备</string>
 </dict>
 </plist>
