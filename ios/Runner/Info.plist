@@ -65,5 +65,12 @@
 			</dict>
 		</dict>
 	</dict>
+	<!-- iOS 14+ 本地网络权限 -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>此应用需要访问本地网络以控制ESP8266设备</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_tcp._local.</string>
+	</array>
 </dict>
 </plist>
