@@ -1,125 +1,249 @@
 import 'package:flutter/material.dart';
+import 'tcp_service.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'ESP8266 LED控制',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  final TcpService _tcpService = TcpService();
+  final List<String> _logs = [];
+  bool _isConnected = false;
+  bool _led1Status = false;
+  bool _led2Status = false;
 
-  void _incrementCounter() {
+  @override
+  void initState() {
+    super.initState();
+    _tcpService.addLogListener(_onLogReceived);
+  }
+
+  void _onLogReceived(String log) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _logs.add('${DateTime.now().toString().substring(11, 19)}: $log');
     });
+  }
+
+  void _connectToServer() async {
+    await _tcpService.connect('192.168.4.1', 5000);
+    setState(() {
+      _isConnected = _tcpService.isConnected;
+    });
+  }
+
+  void _disconnectFromServer() async {
+    await _tcpService.disconnect();
+    setState(() {
+      _isConnected = _tcpService.isConnected;
+      _led1Status = false;
+      _led2Status = false;
+    });
+  }
+
+  // LED控制方法
+  void _toggleLED1() async {
+    if (await _tcpService.turnOnLED1()) {
+      setState(() {
+        _led1Status = !_led1Status; // 切换状态
+      });
+    }
+  }
+
+  void _toggleLED2() async {
+    if (await _tcpService.turnOnLED2()) {
+      setState(() {
+        _led2Status = !_led2Status; // 切换状态
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _tcpService.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text('ESP8266 LED控制'),
+        backgroundColor: _isConnected ? Colors.green : Colors.red,
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Column(
+        children: [
+          // 连接状态和控制按钮
+          Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Text(
+                  '连接状态: ${_isConnected ? "已连接" : "未连接"}',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: _isConnected ? Colors.green : Colors.red,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _isConnected ? null : _connectToServer,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text('连接服务器'),
+                    ),
+                    ElevatedButton(
+                      onPressed: _isConnected ? _disconnectFromServer : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text('断开连接'),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                // LED控制区域
+                if (_isConnected) ...[
+                  Text(
+                    'LED控制',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  // LED1控制
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text('LED1: ${_led1Status ? "开启" : "关闭"}'),
+                      ElevatedButton(
+                        onPressed: _toggleLED1,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _led1Status ? Colors.green : Colors.orange,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text(_led1Status ? '关闭LED1' : '开启LED1'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  // LED2控制
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text('LED2: ${_led2Status ? "开启" : "关闭"}'),
+                      ElevatedButton(
+                        onPressed: _toggleLED2,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _led2Status ? Colors.green : Colors.orange,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Text(_led2Status ? '关闭LED2' : '开启LED2'),
+                      ),
+                    ],
+                  ),
+                ],
+                SizedBox(height: 10),
+                Text(
+                  '服务器: 192.168.4.1:5000',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          Divider(),
+          // 日志显示区域
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '日志输出:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black87,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: ListView.builder(
+                        itemCount: _logs.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            child: Text(
+                              _logs[index],
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontFamily: 'monospace',
+                                fontSize: 12,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '日志条数: ${_logs.length}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _logs.clear();
+                          });
+                        },
+                        child: Text('清空日志'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
