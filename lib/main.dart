@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'tcp_service.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,12 +15,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -85,14 +89,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ESP8266 LED控制'),
+        title: const Text('ESP8266 LED控制'),
         backgroundColor: _isConnected ? Colors.green : Colors.red,
       ),
       body: Column(
         children: [
           // 连接状态和控制按钮
           Container(
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             child: Column(
               children: [
                 Text(
@@ -103,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: _isConnected ? Colors.green : Colors.red,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -113,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
                       ),
-                      child: Text('连接服务器'),
+                      child: const Text('连接服务器'),
                     ),
                     ElevatedButton(
                       onPressed: _isConnected ? _disconnectFromServer : null,
@@ -121,21 +125,21 @@ class _MyHomePageState extends State<MyHomePage> {
                         backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
                       ),
-                      child: Text('断开连接'),
+                      child: const Text('断开连接'),
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 // LED控制区域
                 if (_isConnected) ...[
-                  Text(
+                  const Text(
                     'LED控制',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   // LED1控制
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -151,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   // LED2控制
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -168,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ],
                   ),
                 ],
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
                   '服务器: 192.168.4.1:5000',
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
@@ -176,22 +180,22 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          Divider(),
+          const Divider(),
           // 日志显示区域
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     '日志输出:',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
@@ -203,13 +207,13 @@ class _MyHomePageState extends State<MyHomePage> {
                         itemCount: _logs.length,
                         itemBuilder: (context, index) {
                           return Padding(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 2,
                             ),
                             child: Text(
                               _logs[index],
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.green,
                                 fontFamily: 'monospace',
                                 fontSize: 12,
@@ -220,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -234,7 +238,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             _logs.clear();
                           });
                         },
-                        child: Text('清空日志'),
+                        child: const Text('清空日志'),
                       ),
                     ],
                   ),
